@@ -3,17 +3,25 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:osgi="http://www.eclipse.org/gemini/blueprint/schema/blueprint"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-                        http://www.eclipse.org/gemini/blueprint/schema/blueprint http://www.eclipse.org/gemini/blueprint/schema/blueprint/gemini-blueprint.xsd">
+                        http://www.eclipse.org/gemini/blueprint/schema/blueprint http://www.eclipse.org/gemini/blueprint/schema/blueprint/gemini-blueprint.xsd
+                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
     <osgi:reference id="ExternalProviderIdentifierMappingService" interface="org.jahia.modules.external.IdentifierMappingService"/>
 
     <bean id="TMDBProvider" class="org.jahia.modules.external.ExternalContentStoreProvider" parent="AbstractJCRStoreProvider" >
         <property name="key" value="TMDBProvider"/>
-        <property name="mountPoint" value="/test"/>
+        <property name="mountPoint" value="/sites/movies/contents/tmdb"/>
         <property name="identifierMappingService" ref="ExternalProviderIdentifierMappingService"/>
+        <property name="extendableTypes">
+            <list>
+                <value>nt:base</value>
+            </list>
+        </property>
         <property name="dataSource">
             <bean class="org.jahia.modules.tmdbprovider.TMDBProvider" init-method="start">
                 <property name="cacheProvider" ref="ehCacheProvider"/>
+                <property name="apiKeyValue" value="${com.jahia.tmdb.apiKeyValue}"/>
+
             </bean>
         </property>
     </bean>

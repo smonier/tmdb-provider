@@ -2,13 +2,12 @@
 <jmix = 'http://www.jahia.org/jahia/mix/1.0'>
 
 
-[jnt:movie] > jnt:content
- - title (string) i18n
+[jnt:movie] > jnt:content, jmix:structuredContent, mix:title
  - overview (string) i18n
  - tagline (string) i18n
  - original_title (string)
  - backdrop_path (string)
- - poster_path (string)
+ - poster_path (string) i18n
  - homepage (string)
  - release_date (date)
  - status (string)

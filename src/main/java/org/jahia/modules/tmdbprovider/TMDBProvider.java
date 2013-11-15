@@ -10,29 +10,38 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 import org.jahia.modules.external.ExternalData;
 import org.jahia.modules.external.ExternalDataSource;
+import org.jahia.modules.external.ExternalQuery;
+import org.jahia.modules.external.query.QueryHelper;
 import org.jahia.services.cache.ehcache.EhCacheProvider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.jcr.Binary;
-import javax.jcr.ItemNotFoundException;
-import javax.jcr.PathNotFoundException;
-import javax.jcr.RepositoryException;
+import javax.jcr.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
-public class TMDBProvider implements ExternalDataSource, ExternalDataSource.LazyProperty {
+public class TMDBProvider implements ExternalDataSource, ExternalDataSource.LazyProperty, ExternalDataSource.Searchable {
+    public static final HashSet<String> LAZY_PROPERTIES = Sets.newHashSet("original_title", "homepage", "status", "runtime", "imdb_id", "budget", "revenue");
+    public static final HashSet<String> LAZY_I18N_PROPERTIES = Sets.newHashSet("jcr:title", "overview", "tagline", "poster_path");
+
+    public static final HashSet<String> ROOT_NODES = Sets.newHashSet("movies");
+
     private static String API_URL = "api.themoviedb.org";
     private static String API_CONFIGURATION = "/3/configuration";
     private static String API_MOVIE = "/3/movie/";
     private static String API_TV = "/3/tv/";
     private static String API_DISCOVER_MOVIE = "/3/discover/movie";
     private static String API_DISCOVER_TV = "/3/discover/tv";
+    private static String API_SEARCH_MOVIE = "/3/search/movie";
     private static String API_KEY = "api_key";
-    private static String API_KEY_VALUE = "9365395dd91e8a0b7f829d05fc10b54d";
+
+    private static Pattern YEAR_PATTERN = Pattern.compile("[0-9]{4,4}");
+    private static Pattern DATE_PATTERN = Pattern.compile("[0-9]{4,4}/[0-9]{2,2}");
 
     private EhCacheProvider ehCacheProvider;
     private Ehcache cache;
+    private String apiKeyValue;
 
     private HttpClient httpClient;
 
@@ -46,6 +55,10 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
 
     public void setCacheProvider(EhCacheProvider ehCacheProvider) {
         this.ehCacheProvider = ehCacheProvider;
+    }
+
+    public void setApiKeyValue(String apiKeyValue) {
+        this.apiKeyValue = apiKeyValue;
     }
 
     public void start() {
@@ -73,39 +86,43 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
         try {
             switch (splitPath.length) {
                 case 0:
-                    r.add("movies");
-                    r.add("tv");
-                    break;
+                    r.addAll(ROOT_NODES);
+                    return r;
                 case 2:
                     for (int i = 1900; i <= 2013; i++) {
                         r.add(Integer.toString(i));
                     }
-                    break;
+                    return r;
                 case 3:
                     for (int i = 1; i <= 12; i++) {
                         r.add(StringUtils.leftPad(Integer.toString(i), 2, "0"));
                     }
-                    break;
+                    return r;
                 case 4:
                     if (path.startsWith("/movies")) {
-                        JSONObject o = queryTMDB(API_DISCOVER_MOVIE, "release_date.gte", splitPath[2] + "-" + splitPath[3] + "-01", "release_date.lte", splitPath[2] + "-" + splitPath[3] + "-31");
-                        JSONArray result = o.getJSONArray("results");
-                        for (int i = 0; i < result.length(); i++) {
-                            JSONObject movie = result.getJSONObject(i);
-                            r.add(movie.getString("id"));
-                            cache.put(new Element("movie-" + movie.getString("id"), movie.toString()));
+                        final String date = splitPath[2] + "-" + splitPath[3];
+                        if (cache.get("list-" + date) != null) {
+                            r = (List<String>) cache.get("list-" + date).getObjectValue();
+                        } else {
+                            JSONObject o = queryTMDB(API_DISCOVER_MOVIE, "release_date.gte", date + "-01", "release_date.lte", splitPath[2] + "-" + splitPath[3] + "-31");
+                            JSONArray result = o.getJSONArray("results");
+                            for (int i = 0; i < result.length(); i++) {
+                                JSONObject movie = result.getJSONObject(i);
+                                r.add(movie.getString("id"));
+                                cache.put(new Element("movie-" + movie.getString("id"), movie.toString()));
+                            }
+                            cache.put(new Element("list-" + date, r));
                         }
+                        return r;
                     }
-                    break;
                 case 5:
-                    break;
-
+                    return Collections.emptyList();
             }
         } catch (JSONException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
-        return r;
+        return Collections.emptyList();
     }
 
     /**
@@ -120,15 +137,26 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
     public ExternalData getItemByIdentifier(String identifier) throws ItemNotFoundException {
         try {
             if (identifier.equals("root")) {
-                return new ExternalData(identifier, "/", "jnt:contentList", new HashMap<String, String[]>());
+                return new ExternalData(identifier, "/", "jnt:contentFolder", new HashMap<String, String[]>());
             }
             if (identifier.contains("-rootfolder")) {
-                return new ExternalData(identifier, "/" + StringUtils.substringBefore(identifier, "-rootfolder"), "jnt:contentList", new HashMap<String, String[]>());
+                final String s = StringUtils.substringBefore(identifier, "-rootfolder");
+                if (ROOT_NODES.contains(s)) {
+                    return new ExternalData(identifier, "/" + s, "jnt:contentFolder", new HashMap<String, String[]>());
+                }
             } else if (identifier.contains("-folder-")) {
-                return new ExternalData(identifier, "/" + StringUtils.substringBefore(identifier, "-folder-") + "/" + StringUtils.substringAfter(identifier, "-folder-"), "jnt:contentList", new HashMap<String, String[]>());
+                final String s = StringUtils.substringBefore(identifier, "-folder-");
+                final String date = StringUtils.substringAfter(identifier, "-folder-");
+                if (ROOT_NODES.contains(s) && (YEAR_PATTERN.matcher(date).matches() || DATE_PATTERN.matcher(date).matches())) {
+                    return new ExternalData(identifier, "/" + s + "/" + date, "jnt:contentFolder", new HashMap<String, String[]>());
+                }
             } else if (identifier.startsWith("movies-")) {
                 String movieId = StringUtils.substringAfter(identifier, "movies-");
-
+                try {
+                    Integer.parseInt(movieId);
+                } catch (NumberFormatException e) {
+                    throw new ItemNotFoundException(identifier);
+                }
                 JSONObject movie;
 
                 String lang = "en";
@@ -142,27 +170,29 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
                     cache.put(new Element("fullmovie-" + lang + "-" + movieId, movie.toString()));
                 }
 
-                String path = "/movies/" + StringUtils.substringBeforeLast(movie.getString("release_date"), "-").replace("-", "/") + "/" + movie.getString("id");
-
                 JSONObject configuration = getConfiguration();
                 String baseUrl = configuration.getJSONObject("images").getString("base_url");
                 String size = "original";
                 Map<String, String[]> properties = new HashMap<String, String[]>();
-                properties.put("backdrop_path", new String[]{baseUrl + size + movie.getString("backdrop_path")});
-                properties.put("poster_path", new String[]{baseUrl + size + movie.getString("poster_path")});
-                properties.put("release_date", new String[]{movie.getString("release_date") + "T00:00:00.000+00:00"});
-                properties.put("adult", new String[]{movie.getString("adult")});
-                properties.put("vote_average", new String[]{movie.getString("vote_average")});
-                properties.put("vote_count", new String[]{movie.getString("vote_count")});
-                properties.put("popularity", new String[]{movie.getString("popularity")});
+                if (movie.getString("backdrop_path") != null)
+                    properties.put("backdrop_path", new String[]{baseUrl + size + movie.getString("backdrop_path")});
+                if (movie.getString("release_date") != null)
+                    properties.put("release_date", new String[]{movie.getString("release_date") + "T00:00:00.000+00:00"});
+                if (movie.getString("adult") != null) properties.put("adult", new String[]{movie.getString("adult")});
+                if (movie.getString("vote_average") != null)
+                    properties.put("vote_average", new String[]{movie.getString("vote_average")});
+                if (movie.getString("vote_count") != null)
+                    properties.put("vote_count", new String[]{movie.getString("vote_count")});
+                if (movie.getString("popularity") != null)
+                    properties.put("popularity", new String[]{movie.getString("popularity")});
 
-                ExternalData data = new ExternalData(identifier, path, "jnt:movie", properties);
+                ExternalData data = new ExternalData(identifier, getPathForMovie(movie), "jnt:movie", properties);
 
-                data.setLazyProperties(Sets.newHashSet("original_title", "homepage", "status", "runtime", "imdb_id", "budget", "revenue"));
+                data.setLazyProperties(new HashSet<String>(LAZY_PROPERTIES));
 
                 Map<String, Set<String>> lazy18 = new HashMap<String, Set<String>>();
-                lazy18.put("en", Sets.newHashSet("title", "overview", "tagline"));
-                lazy18.put("fr", Sets.newHashSet("title", "overview", "tagline"));
+                lazy18.put("en", new HashSet<String>(LAZY_I18N_PROPERTIES));
+                lazy18.put("fr", new HashSet<String>(LAZY_I18N_PROPERTIES));
                 data.setLazyI18nProperties(lazy18);
 
                 return data;
@@ -174,6 +204,10 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
         }
 
         throw new ItemNotFoundException(identifier);
+    }
+
+    private String getPathForMovie(JSONObject movie) throws JSONException {
+        return "/movies/" + StringUtils.substringBeforeLast(movie.getString("release_date"), "-").replace("-", "/") + "/" + movie.getString("id");
     }
 
     /**
@@ -213,7 +247,7 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
      */
     @Override
     public Set<String> getSupportedNodeTypes() {
-        return Sets.newHashSet("jnt:contentList", "jnt:movie");
+        return Sets.newHashSet("jnt:contentFolder", "jnt:movie");
     }
 
     /**
@@ -256,7 +290,7 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
             for (int i = 0; i < params.length; i += 2) {
                 m.put(params[i], params[i + 1]);
             }
-            m.put(API_KEY, API_KEY_VALUE);
+            m.put(API_KEY, apiKeyValue);
 
             url.setQuery(m.keySet().toArray(new String[m.size()]), m.values().toArray(new String[m.size()]));
             System.out.println("########" + url);
@@ -270,44 +304,33 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
 
 
     @Override
-    public String[] getPropertyValues(ExternalData data, String propertyName) throws PathNotFoundException {
-        return getI18nPropertyValues(data, "en", propertyName);
+    public String[] getPropertyValues(String path, String propertyName) throws PathNotFoundException {
+        return getI18nPropertyValues(path, "en", propertyName);
     }
 
     @Override
-    public String[] getI18nPropertyValues(ExternalData data, String lang, String propertyName) throws PathNotFoundException {
+    public String[] getI18nPropertyValues(String path, String lang, String propertyName) throws PathNotFoundException {
         String result;
         try {
             JSONObject movie;
-            if (data.getId().startsWith("movies-")) {
-
-                String movieId = StringUtils.substringAfter(data.getId(), "movies-");
+            if (path.startsWith("/movies")) {
+                String movieId = StringUtils.substringAfterLast(path, "/");
                 if (cache.get("fullmovie-" + lang + "-" + movieId) != null) {
                     movie = new JSONObject((String) cache.get("fullmovie-" + lang + "-" + movieId).getObjectValue());
                 } else {
                     movie = queryTMDB(API_MOVIE + movieId, "language", lang);
                     cache.put(new Element("fullmovie-" + lang + "-" + movieId, movie.toString()));
                 }
-                result = movie.getString(propertyName);
-//                Map<String, String[]> properties = data.getProperties();
-//                properties.put("original_title", new String[]{movie.getString("original_title")});
-//                properties.put("homepage", new String[]{movie.getString("homepage")});
-//                properties.put("status", new String[]{movie.getString("status")});
-//                properties.put("runtime", new String[]{movie.getString("runtime")});
-//                properties.put("imdb_id", new String[]{movie.getString("imdb_id")});
-//                properties.put("budget", new String[]{movie.getString("budget")});
-//                properties.put("revenue", new String[]{movie.getString("revenue")});
-//                data.getLazyProperties().clear();
-//
-//                Map<String, Map<String, String[]>> i18nProperties = new HashMap<String, Map<String, String[]>>();
-//                data.setI18nProperties(i18nProperties);
-//                i18nProperties.put(lang, new HashMap<String, String[]>());
-//                i18nProperties.get(lang).put("title", new String[]{movie.getString("title")});
-//                i18nProperties.get(lang).put("overview", new String[]{movie.getString("overview")});
-//                i18nProperties.get(lang).put("tagline", new String[]{movie.getString("tagline")});
-//                data.setI18nProperties(i18nProperties);
-//                data.getLazyI18nProperties().clear();
-                return new String[]{result};
+                if (propertyName.equals("jcr:title") && movie.getString("title") != null) {
+                    return new String[]{movie.getString("title")};
+                } else if (propertyName.equals("poster_path") && movie.getString("poster_path") != null) {
+                    JSONObject configuration = getConfiguration();
+                    String baseUrl = configuration.getJSONObject("images").getString("base_url");
+                    return new String[]{baseUrl + "original" + movie.getString(propertyName)};
+                } else if (movie.getString(propertyName) != null) {
+                    return new String[]{movie.getString(propertyName)};
+                }
+                return new String[]{""};
             }
         } catch (JSONException e) {
             throw new PathNotFoundException(e);
@@ -318,7 +341,7 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
     }
 
     @Override
-    public Binary[] getBinaryPropertyValues(ExternalData data, String propertyName) throws PathNotFoundException {
+    public Binary[] getBinaryPropertyValues(String path, String propertyName) throws PathNotFoundException {
         return new Binary[0];
     }
 
@@ -332,5 +355,39 @@ public class TMDBProvider implements ExternalDataSource, ExternalDataSource.Lazy
         }
 
         return configuration;
+    }
+
+    @Override
+    public List<String> search(ExternalQuery query) throws RepositoryException {
+        List<String> results = new ArrayList<String>();
+        String nodeType = QueryHelper.getNodeType(query.getSource());
+
+        try {
+            if (nodeType.equals("jnt:movie")) {
+                JSONArray tmdbResult = null;
+                String year;
+                String month;
+                String path = QueryHelper.getRootPath(query.getConstraint());
+                if (path != null) {
+                    String[] splitPath = path.split("/");
+                }
+
+                Map<String, Value> m = QueryHelper.getSimpleAndConstraints(query.getConstraint());
+                if (m.containsKey("jcr:title")) {
+                    tmdbResult = queryTMDB(API_SEARCH_MOVIE, "query", m.get("jcr:title").getString()).getJSONArray("results");
+                } else {
+                    queryTMDB(API_DISCOVER_MOVIE, "query", m.get("jcr:title").getString()).getJSONArray("results");
+                }
+
+                if (tmdbResult != null) {
+                    for (int i = 0; i < tmdbResult.length(); i++) {
+                        results.add(getPathForMovie(tmdbResult.getJSONObject(i)));
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            throw new RepositoryException(e);
+        }
+        return results;
     }
 }
