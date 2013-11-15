@@ -1,0 +1,25 @@
+<jnt = 'http://www.jahia.org/jahia/nt/1.0'>
+<jmix = 'http://www.jahia.org/jahia/mix/1.0'>
+
+
+[jnt:movie] > jnt:content
+ - title (string) i18n
+ - overview (string) i18n
+ - tagline (string) i18n
+ - original_title (string)
+ - backdrop_path (string)
+ - poster_path (string)
+ - homepage (string)
+ - release_date (date)
+ - status (string)
+ - runtime (long)
+ - spoken_languages (string) multiple
+ - adult (boolean)
+ - production_companies (string) multiple
+ - imdb_id (string)
+ - budget (long)
+ - revenue (double)
+ - vote_average (double)
+ - vote_count (long)
+ - popularity (double)
+
