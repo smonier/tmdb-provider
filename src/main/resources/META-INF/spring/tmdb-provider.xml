@@ -8,22 +8,27 @@
 
     <osgi:reference id="ExternalProviderIdentifierMappingService" interface="org.jahia.modules.external.IdentifierMappingService"/>
 
+    <bean class="org.jahia.modules.tmdbprovider.TMDBTokenAction">
+        <property name="name" value="tmdbtoken"/>
+        <property name="datasource" ref="TMDBDataSource"/>
+    </bean>
+
     <bean id="TMDBProvider" class="org.jahia.modules.external.ExternalContentStoreProvider" parent="AbstractJCRStoreProvider" >
         <property name="key" value="TMDBProvider"/>
         <property name="mountPoint" value="/sites/movies/contents/tmdb"/>
         <property name="identifierMappingService" ref="ExternalProviderIdentifierMappingService"/>
+        <property name="extensionProvider" ref="DefaulJCRStoreProvider"/>
         <property name="extendableTypes">
             <list>
                 <value>nt:base</value>
             </list>
         </property>
-        <property name="dataSource">
-            <bean class="org.jahia.modules.tmdbprovider.TMDBProvider" init-method="start">
-                <property name="cacheProvider" ref="ehCacheProvider"/>
-                <property name="apiKeyValue" value="${com.jahia.tmdb.apiKeyValue}"/>
+        <property name="dataSource" ref="TMDBDataSource"/>
+    </bean>
 
-            </bean>
-        </property>
+    <bean name="TMDBDataSource" class="org.jahia.modules.tmdbprovider.TMDBDataSource" init-method="start">
+        <property name="cacheProvider" ref="ehCacheProvider"/>
+        <property name="apiKeyValue" value="${com.jahia.tmdb.apiKeyValue}"/>
     </bean>
 
 </beans>

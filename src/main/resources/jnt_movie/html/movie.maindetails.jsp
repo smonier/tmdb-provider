@@ -16,7 +16,7 @@
 
 <div id="mainCol">
 <div class="title">
-    <h2 id="title"><span itemprop="name">${currentNode.properties['jcr:title'].string}</span></h2> <h3 id="year">(${currentNode.properties['release_date'].date.time.year})</h3>
+    <h2 id="title"><span itemprop="name">${currentNode.properties['jcr:title'].string}</span> (${currentNode.properties['release_date'].date.time.year + 1900})</h2>
 </div>
 
 <div class="rating">
@@ -27,7 +27,7 @@
 
 
 <h3>Overview </h3>
-<p id="overview" itemprop="description">${currentNode.properties['overview'].string}</p>
+<p id="overview" class="lead" itemprop="description">${currentNode.properties['overview'].string}</p>
 
 <h3>Tagline</h3>
 <p id="tagline">${currentNode.properties['tagline'].string}</p>

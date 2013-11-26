@@ -14,13 +14,12 @@
 <%--@elvariable id="currentResource" type="org.jahia.services.render.Resource"--%>
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 
-<div id="leftCol">
+<div id="leftCol" class="well">
 
     <h3 style="margin-top: 2px;">Posters </h3>
     <a href="${currentNode.properties['poster_path'].string}"><img id="upload_poster" class="shadow" src="${currentNode.properties['poster_path'].string}" width="185" height="278" itemprop="image"></a>
 
     <h3>Language</h3>
-    <span style="" class="k-widget k-dropdown k-header" unselectable="on" role="listbox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-owns="language_listbox" aria-disabled="false" aria-readonly="false" aria-busy="false" aria-activedescendant="language_option_selected"><span unselectable="on" class="k-dropdown-wrap k-state-default"><span unselectable="on" class="k-input">English (en)</span><span unselectable="on" class="k-select"><span unselectable="on" class="k-icon k-i-arrow-s">select</span></span></span><select name="language" id="language" size="1" itemprop="inLanguage" content="cs da de en es fi fr hu id it ja nb nl pl pt ru sv tr uk zh" data-role="dropdownlist" style="display: none;"><option value="reset">Reset</option><option value="cs">Český (cs)</option><option value="da">Dansk (da)</option><option value="de">Deutsch (de)</option><option value="en" selected="selected">English (en)</option><option value="es">Español (es)</option><option value="fi">Suomi (fi)</option><option value="fr">Français (fr)</option><option value="hu">Magyar (hu)</option><option value="id">Bahasa indonesia (id)</option><option value="it">Italiano (it)</option><option value="ja">日本語 (ja)</option><option value="nb">Bokmål (nb)</option><option value="nl">Nederlands (nl)</option><option value="pl">Polski (pl)</option><option value="pt">Português (pt)</option><option value="ru">Pусский (ru)</option><option value="sv">Svenska (sv)</option><option value="tr">Türkçe (tr)</option><option value="uk">Український (uk)</option><option value="zh">中国 (zh)</option></select></span>
 
 
 
