@@ -15,58 +15,64 @@
 <%--@elvariable id="url" type="org.jahia.services.render.URLGenerator"--%>
 
 <div id="mainCol">
-<div class="title">
-    <h2 id="title"><span itemprop="name">${currentNode.properties['jcr:title'].string}</span> (${currentNode.properties['release_date'].date.time.year + 1900})</h2>
-</div>
-
-<div class="rating">
-    <div id="updateRating" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">
-        <p class="average"><span id="rating_hint" itemprop="ratingValue">${currentNode.properties['vote_average'].string}</span>/<span itemprop="bestRating">10</span> (<span itemprop="ratingCount">${currentNode.properties['vote_count'].string}</span> votes)</p>
+    <div class="title">
+        <h2 id="title"><span itemprop="name">${currentNode.properties['jcr:title'].string}</span>
+            (${currentNode.properties['release_date'].date.time.year + 1900})</h2>
     </div>
-</div>
+
+    <div class="rating">
+        <div id="updateRating" itemprop="aggregateRating" itemscope="" itemtype="http://schema.org/AggregateRating">
+            <p class="average"><span id="rating_hint"
+                                     itemprop="ratingValue">${currentNode.properties['vote_average'].string}</span>/<span
+                    itemprop="bestRating">10</span> (<span
+                    itemprop="ratingCount">${currentNode.properties['vote_count'].string}</span> votes)</p>
+        </div>
+    </div>
 
 
-<h3>Overview </h3>
-<p id="overview" class="lead" itemprop="description">${currentNode.properties['overview'].string}</p>
+    <div style="border-radius: 4px;border: 1px solid #e1e1e8;background-color: #f7f7f9;margin-bottom: 14px;padding: 9px 14px;">
 
-<h3>Tagline</h3>
-<p id="tagline">${currentNode.properties['tagline'].string}</p>
+        <h3>Overview </h3>
 
-<h3>Crew</h3>
-<table class="crewStub" border="0" cellspacing="0" cellpadding="0">
-    <tbody>
-    <tr>
-        <td class="job">Director:</td>
-        <%--<td class="person"><span itemprop="director" itemscope="" itemtype="http://schema.org/Person"><a href="/person/608-hayao-miyazaki" itemprop="url"><span itemprop="name">Hayao Miyazaki</span></a></span></td>--%>
-    </tr>
-    <tr>
-        <td class="job">Writer:</td>
-        <%--<td class="person"><span itemprop="author" itemscope="" itemtype="http://schema.org/Person"><a href="/person/608-hayao-miyazaki" itemprop="url"><span itemprop="name">Hayao Miyazaki</span></a></span></td>--%>
-    </tr>
-    </tbody>
-</table>
+        <p id="overview" class="lead" itemprop="description">${currentNode.properties['overview'].string}</p>
+    </div>
+    <h3>Tagline</h3>
+
+    <p id="tagline">${currentNode.properties['tagline'].string}</p>
+
+    <h3>Crew</h3>
+    <table class="table table-striped">
+        <tbody>
+        <c:forEach items="${jcr:getChildrenOfType(currentNode,'jnt:crew')}" var="sub">
+            <tr>
+                <td>${sub.properties['job'].string}</td>
+                <td>${sub.properties['name'].string}</td>
+                <td>
+                    <c:if test="${not empty sub.properties['profile'].string}">
+                        <img width="50" src="${sub.properties['profile'].string}"/>
+                    </c:if>
+                </td>
+            </tr>
+        </c:forEach>
+        </tbody>
+    </table>
+
+    <h3>Cast</h3>
+    <table class="table table-striped">
+        <tbody>
+        <c:forEach items="${jcr:getChildrenOfType(currentNode,'jnt:cast')}" var="sub">
+            <tr>
+                <td>${sub.properties['name'].string}</td>
+                <td>${sub.properties['character'].string}</td>
+                <td><img width="50" src="${sub.properties['profile'].string}"/></td>
+            </tr>
+        </c:forEach>
 
 
-<h3>Cast</h3>
-<table id="castTable" class="cast" border="0" cellspacing="0" cellpadding="0">
-    <tbody>
-    <tr>
-    </tr>
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-
-<h3>Backdrops</h3>
-
-<div id="backdrop_window"></div>
-<div id="backdrops" class="image_carousel">
-    <div class="caroufredsel_wrapper" style="display: block; text-align: start; float: none; position: relative; top: auto; right: auto; bottom: auto; left: auto; z-index: auto; width: 744px; height: 189px; margin: 0px; overflow: hidden;"><div id="images" style="text-align: left; float: none; position: absolute; top: 0px; right: auto; bottom: auto; left: 0px; margin: 0px; width: 3856px; height: 189px;">
-    </div></div>
 
     <div style="clear: both;"></div>
-</div>
-
-
-<div style="clear: both;"></div>
 </div>
 
