@@ -553,11 +553,9 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
                 String year;
                 String month;
 
-                Map<String, Value> m = QueryHelper.getSimpleAndConstraints(query.getConstraint());
+                Map<String, Value> m = QueryHelper.getSimpleOrConstraints(query.getConstraint());
                 if (m.containsKey("jcr:title")) {
                     tmdbResult = queryTMDB(API_SEARCH_MOVIE, "query", m.get("jcr:title").getString()).getJSONArray("results");
-                } else if (m.containsKey(null)) {
-                    tmdbResult = queryTMDB(API_SEARCH_MOVIE, "query", m.get(null).getString()).getJSONArray("results");
                 }
 
                 if (tmdbResult != null) {
@@ -599,6 +597,7 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
     private String getSessionId() throws RepositoryException {
         if (token != null && sessionId == null) {
             JSONObject session = queryTMDB("/3/authentication/session/new", "request_token", token);
+            token = null;
             try {
                 sessionId = session.getString("session_id");
             } catch (JSONException e) {
@@ -613,6 +612,7 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
 
     public String createToken() throws RepositoryException, JSONException {
         token = queryTMDB("/3/authentication/token/new").getString("request_token");
+        sessionId = null;
         return token;
     }
 
