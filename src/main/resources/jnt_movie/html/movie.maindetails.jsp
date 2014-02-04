@@ -45,8 +45,8 @@
         <tbody>
         <c:forEach items="${jcr:getChildrenOfType(currentNode,'jnt:crew')}" var="sub">
             <tr>
-                <td>${sub.properties['job'].string}</td>
-                <td>${sub.properties['name'].string}</td>
+              <td>${sub.properties['job'].string}</td>
+              <td><a href="${url.base}${sub.properties['person'].node.path}.html">${sub.properties['name'].string}</a></td>
                 <td>
                     <c:if test="${not empty sub.properties['profile'].string}">
                         <img width="50" src="${sub.properties['profile'].string}"/>
@@ -62,7 +62,7 @@
         <tbody>
         <c:forEach items="${jcr:getChildrenOfType(currentNode,'jnt:cast')}" var="sub">
             <tr>
-                <td>${sub.properties['name'].string}</td>
+              <td><a href="${url.base}${sub.properties['person'].node.path}.html">${sub.properties['name'].string}</a></td>
                 <td>${sub.properties['character'].string}</td>
                 <td><img width="50" src="${sub.properties['profile'].string}"/></td>
             </tr>

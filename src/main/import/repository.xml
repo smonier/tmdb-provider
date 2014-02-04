@@ -4,6 +4,7 @@
         <tmdb-provider j:dependencies="bootstrap bootstrap-components default external-provider"
                      j:moduleType="module"
                      j:title="tmdb-provider"
+                     jcr:mixinTypes="jmix:hasExternalProviderExtension"
                      jcr:primaryType="jnt:module">
                 
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
@@ -65,6 +66,29 @@
                             </bootstrap-row>
                         </pagecontent>
                     </movieslist-template>
+                    <person-template j:applyOn="jnt:moviePerson"
+                              j:defaultTemplate="true"
+                              j:hiddenTemplate="false"
+                              jcr:primaryType="jnt:contentTemplate">
+                        <j:translation_en jcr:language="en"
+                                 jcr:mixinTypes="mix:title"
+                                 jcr:primaryType="jnt:translation"
+                                 jcr:title="person-template"/>
+                        <pagecontent jcr:primaryType="jnt:contentList">
+                            <bootstrap-row fluid="true" jcr:primaryType="jnt:bootstrapRow">
+                                <bootstrap-column jcr:primaryType="jnt:bootstrapColumn" offset="0" span="4">
+                                    <bootstrap-column jcr:primaryType="jnt:contentList">
+                                        <main-resource-display j:mainResourceView="picture" jcr:primaryType="jnt:mainResourceDisplay"/>
+                                    </bootstrap-column>
+                                </bootstrap-column>
+                                <bootstrap-column-1 jcr:primaryType="jnt:bootstrapColumn" offset="0" span="8">
+                                    <bootstrap-column-1 jcr:primaryType="jnt:contentList">
+                                        <main-resource-display j:mainResourceView="default" jcr:primaryType="jnt:mainResourceDisplay"/>
+                                    </bootstrap-column-1>
+                                </bootstrap-column-1>
+                            </bootstrap-row>
+                        </pagecontent>
+                    </person-template>
                 </templates>
                 
                 <portlets jcr:primaryType="jnt:portletFolder"/>

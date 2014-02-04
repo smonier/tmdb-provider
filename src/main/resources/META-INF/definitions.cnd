@@ -26,7 +26,7 @@
  + * (jnt:crew)
 
 [jnt:cast]
- - people (weakreference)
+ - person (weakreference)
  - name (string)
  - character (string)
  - order (long)
@@ -34,7 +34,7 @@
  - profile (string)
 
 [jnt:crew]
- - people (weakreference)
+ - person (weakreference)
  - name (string)
  - job (string)
  - department (string)
@@ -43,3 +43,11 @@
 [jnt:moviesList] > jnt:content, jmix:list, jmix:structuredContent, mix:title
  - poster_path (string)
  + * (jnt:content)
+
+[jnt:moviePerson] > jnt:content, jmix:structuredContent
+ - name (string)
+ - biography (string)
+ - homepage (string)
+ - birthday (date)
+ - deathday (date)
+ - profile (string)
