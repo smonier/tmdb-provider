@@ -15,7 +15,7 @@
 
     <bean id="TMDBProvider" class="org.jahia.modules.external.ExternalContentStoreProvider" parent="AbstractJCRStoreProvider" >
         <property name="key" value="TMDBProvider"/>
-        <property name="mountPoint" value="/sites/movies/contents/tmdb"/>
+        <property name="mountPoint" value="/sites/ACMESPACE/contents/tmdb"/>
         <property name="externalProviderInitializerService" ref="ExternalProviderInitializerService"/>
         <property name="extendableTypes">
             <list>
