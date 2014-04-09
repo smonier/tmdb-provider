@@ -14,8 +14,8 @@
   <name>tmdb-provider</name>
   <description>This is the custom module (tmdb-provider) for running on a Jahia xCM server.</description>
   <scm>
-    <connection>scm:dummy:uri</connection>
-    <developerConnection>scm:dummy:uri</developerConnection>
+    <connection>scm:git:git@github.com:tdraier/tmdb-provider.git</connection>
+    <developerConnection>scm:git:git@github.com:tdraier/tmdb-provider.git</developerConnection>
   </scm>
   <dependencies>
     <dependency>

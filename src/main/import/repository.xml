@@ -2,11 +2,15 @@
 <content xmlns:j="http://www.jahia.org/jahia/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0">
     <modules jcr:primaryType="jnt:modules">
         <tmdb-provider j:dependencies="bootstrap bootstrap-components default external-provider"
+                     j:modulePriority="0"
                      j:moduleType="module"
                      j:title="tmdb-provider"
                      jcr:mixinTypes="jmix:hasExternalProviderExtension"
                      jcr:primaryType="jnt:module">
                 
+                <portlets jcr:primaryType="jnt:portletFolder"/>
+                <files jcr:primaryType="jnt:folder"/>
+                <contents jcr:primaryType="jnt:contentFolder"/>
                 <templates j:rootTemplatePath="/base" jcr:primaryType="jnt:templatesFolder">
                     <files jcr:primaryType="jnt:folder"/>
                     <contents jcr:primaryType="jnt:contentFolder"/>
@@ -91,9 +95,6 @@
                     </person-template>
                 </templates>
                 
-                <portlets jcr:primaryType="jnt:portletFolder"/>
-                <files jcr:primaryType="jnt:folder"/>
-                <contents jcr:primaryType="jnt:contentFolder"/>
             </tmdb-provider>
     </modules>
 </content>

@@ -17,7 +17,7 @@
 <div style="background:url('${currentNode.properties['backdrop_path'].string}');height:250px;width:780px;">
     <div style="position:absolute; margin:30px 50px;background-color:#ffffff;border:1px solid black;opacity:0.7;filter:alpha(opacity=70);height:80px; ">
         <p style="margin:30px 40px;font-weight:bold;color:#000000;">
-            <a href="${url.base}${currentNode.path}.html">${currentNode.properties['jcr:title'].string}</a>
+          <a href="<c:url value="${url.base}${currentNode.path}.html"/>">${currentNode.properties['jcr:title'].string}</a>
         </p>
     </div>
 </div>

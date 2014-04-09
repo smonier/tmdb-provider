@@ -25,7 +25,7 @@ ${currentNode.properties['biography'].string}
     <c:forEach items="${res.nodes}" var="cast">
         <li>
                 ${cast.properties['character'].string}
-            <a href="${url.base}${cast.parent.path}.html">${cast.parent.properties['jcr:title'].string}</a>
+          <a href="<c:url value="${url.base}${cast.parent.path}.html"/>">${cast.parent.properties['jcr:title'].string}</a>
         </li>
     </c:forEach>
 </ul>
@@ -36,7 +36,7 @@ ${currentNode.properties['biography'].string}
     <c:forEach items="${res.nodes}" var="crew">
         <li>
                 ${crew.properties['job'].string}
-            <a href="${url.base}${crew.parent.path}.html">${crew.parent.properties['jcr:title'].string}</a>
+          <a href="<c:url value="${url.base}${crew.parent.path}.html"/>">${crew.parent.properties['jcr:title'].string}</a>
         </li>
     </c:forEach>
 </ul>
