@@ -85,7 +85,8 @@
     org.jahia.taglibs,
     org.jahia.exceptions,
     org.jahia.services,
-    org.jahia.services.render.scripting
+    org.jahia.services.render.scripting,
+    org.joda.time
             </Import-Package>
             <Jahia-Depends>default,bootstrap-components,bootstrap,external-provider</Jahia-Depends>
             <_removeheaders>${jahia.modules.bundle.removeheaders},

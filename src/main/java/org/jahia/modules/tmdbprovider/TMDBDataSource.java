@@ -14,6 +14,7 @@ import org.jahia.modules.external.ExternalQuery;
 import org.jahia.modules.external.query.QueryHelper;
 import org.jahia.services.cache.ehcache.EhCacheProvider;
 import org.jahia.services.content.nodetypes.NodeTypeRegistry;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +86,10 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
      */
     @Override
     public List<String> getChildren(String path) throws RepositoryException {
+        DateTime currentDate = new DateTime();
+        int yearLimit = currentDate.getYear();
+        int monthLimit = currentDate.getMonthOfYear()-1;
+
         List<String> r = new ArrayList<String>();
 
         String[] splitPath = path.split("/");
@@ -95,13 +100,19 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
             } else if (splitPath[1].equals("movies")) {
                 switch (splitPath.length) {
                     case 2:
-                        for (int i = 1900; i <= 2013; i++) {
+                        for (int i = 1900; i <= yearLimit; i++) {
                             r.add(Integer.toString(i));
                         }
                         return r;
                     case 3:
-                        for (int i = 1; i <= 12; i++) {
-                            r.add(StringUtils.leftPad(Integer.toString(i), 2, "0"));
+                        if (splitPath[2].equals(Integer.toString(yearLimit))) {
+                            for (int i = 1; i <= monthLimit; i++) {
+                                r.add(StringUtils.leftPad(Integer.toString(i), 2, "0"));
+                            }
+                        } else {
+                            for (int i = 1; i <= 12; i++) {
+                                r.add(StringUtils.leftPad(Integer.toString(i), 2, "0"));
+                            }
                         }
                         return r;
                     case 4:
