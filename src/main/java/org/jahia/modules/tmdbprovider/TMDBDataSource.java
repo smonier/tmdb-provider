@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import javax.jcr.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.LazyProperty, ExternalDataSource.Searchable {
@@ -532,6 +533,10 @@ public class TMDBDataSource implements ExternalDataSource, ExternalDataSource.La
     }
 
     private JSONObject queryTMDB(String path, String... params) throws RepositoryException {
+        try {
+            TimeUnit.MILLISECONDS.sleep(100);
+        } catch (InterruptedException e) {
+        }
         try {
             HttpURL url = new HttpURL(API_URL, 80, path);
 
