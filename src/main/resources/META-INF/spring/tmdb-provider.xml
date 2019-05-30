@@ -26,7 +26,7 @@
 
     <bean name="TMDBDataSource" class="org.jahia.modules.tmdbprovider.TMDBDataSource" init-method="start">
         <property name="cacheProvider" ref="ehCacheProvider"/>
-        <property name="apiKeyValue" value="${com.jahia.tmdb.apiKeyValue}"/>
+        <property name="apiKeyValue" value="${com.jahia.tmdb.apiKeyValue:1234}"/>
     </bean>
 
 </beans>
