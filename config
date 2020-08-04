@@ -1,0 +1,18 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+	logallrefupdates = false
+	precomposeunicode = true
+[remote "origin"]
+	url = https://github.com/smonier/tmdb-provider.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+	remote = origin
+	merge = refs/heads/master
+[remote "tmdb-provider.git"]
+	url = V8
+	fetch = +refs/heads/*:refs/remotes/tmdb-provider.git/*
+[remote "V8"]
+	url = git@github.com:smonier/tmdb-provider.git
+	fetch = +refs/heads/*:refs/remotes/V8/*
